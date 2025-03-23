@@ -1,0 +1,78 @@
+<html>
+
+<head></head>
+
+<body>
+
+  <!-- define a canvas element of 500 x 500 pixels -->
+  <canvas id="visualization" width="500" height="500"></canvas>
+  <script>
+    const canvas = document.getElementById('visualization');
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.createImageData(canvas.width, canvas.height);
+
+    // range of points across complex plane
+    const reRange = [-2, 2];
+    const imRange = [-2, 2];
+
+    /// controls the granularity of the visualization
+    const MAX_ITERATIONS = 1000;
+
+    // maps the complex number to pixels on the canvas
+    function mapToDomain(x, y) {
+      return {
+        cReal: reRange[0] + (x / canvas.width) * (reRange[1] - reRange[0]),
+        cImag: imRange[0] + (y / canvas.height) * (imRange[1] - imRange[0]),
+      };
+    }
+
+    // taking in the real (a) and imaginary (bi) parts of the equation,
+    // returns a value if the equation converges. Value < MAX_ITERATIONS
+    function magZ(real, imag) {
+
+      // since n_0 = 0, then a = 0 and bi = 0 as initial values.
+      let n = 0;
+      let a = 0;
+      let bi = 0;
+
+      while (n < MAX_ITERATIONS) {
+        const realSq = a ** 2;
+        const imagSq = bi ** 2;
+        // same as checking if |z|^2 = sqrt(a^ bi^2) but sqrt operation is expensive
+        if (realSq + imagSq > 4) break;
+
+        /* Simplifications for z = a + bi:
+         * Then z^2 = (a + bi)^2
+         *          = a^2 - b^2 + 2abi, or a realPart and ImagPart of z
+         *  Since c also has a real part and imaginary part, we can
+         * combine z, n, and c to make the simplified equations below to 
+         * determine values for the next iteration.
+         */
+        const realPart = realSq - imagSq + real;
+        const imagPart = 2 * a * bi + imag;
+        a = realPart;
+        bi = imagPart;
+        n++;
+      }
+      return n; // returns the magnitude
+    }
+
+    // plot points across the canvas
+    function plot() {
+      for (let x = 0; x < canvas.width; x++) {
+        for (let y = 0; y < canvas.height; y++) {
+          // conver each x,y coord to complex plane
+          const { cReal, cImag } = mapToDomain(x, y);
+          const n = magZ(cReal, cImag);
+          // Set color based on boundedness
+          ctx.fillStyle = n === MAX_ITERATIONS ? 'lightblue' : 'black';
+          ctx.fillRect(x, y, 1, 1);
+        }
+      }
+    }
+
+    plot();
+  </script>
+</body>
+
+</html>
