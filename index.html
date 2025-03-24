@@ -6,6 +6,7 @@
 
   <!-- define a canvas element of 500 x 500 pixels -->
   <canvas id="visualization" width="500" height="500"></canvas>
+  
   <script>
     const canvas = document.getElementById('visualization');
     const ctx = canvas.getContext('2d');
@@ -28,7 +29,7 @@
 
     // taking in the real (a) and imaginary (bi) parts of the equation,
     // returns a value if the equation converges. Value < MAX_ITERATIONS
-    function magZ(real, imag) {
+    function zValue(real, imag) {
 
       // since n_0 = 0, then a = 0 and bi = 0 as initial values.
       let n = 0;
@@ -63,15 +64,65 @@
         for (let y = 0; y < canvas.height; y++) {
           // conver each x,y coord to complex plane
           const { cReal, cImag } = mapToDomain(x, y);
-          const n = magZ(cReal, cImag);
+          const n = zValue(cReal, cImag);
           // Set color based on boundedness
-          ctx.fillStyle = n === MAX_ITERATIONS ? 'lightblue' : 'black';
+          ctx.fillStyle = n === MAX_ITERATIONS ? 'darkblue' : 'lightblue';
           ctx.fillRect(x, y, 1, 1);
         }
       }
     }
 
+    const gridSpacing = 125; // Spacing between gridlines to span the range of c
+    const axisColor = 'black'; // Color of the axes
+
+    // Draw gridlines
+    function drawGrid() {
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 1;
+
+      // Draw vertical gridlines
+      for (let x = 0; x <= canvas.width; x += gridSpacing) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+
+      // Draw horizontal gridlines
+      for (let y = 0; y <= canvas.height; y += gridSpacing) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+    }
+
+    // Draw axes (Real and Imaginary)
+    function drawAxes() {
+      ctx.strokeStyle = axisColor;
+      ctx.lineWidth = 2;
+
+      // Real axis
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height / 2);
+      ctx.lineTo(canvas.width, canvas.height / 2);
+      ctx.stroke();
+
+      // Imaginary axis
+      ctx.beginPath();
+      ctx.moveTo(canvas.width / 2, 0);
+      ctx.lineTo(canvas.width / 2, canvas.height);
+      ctx.stroke();
+
+      // Label the axes
+      ctx.fillStyle = axisColor;
+      ctx.font = '16px Arial';
+      ctx.fillText('Real', canvas.width - 40, canvas.height / 2 - 10);
+      ctx.fillText('Imaginary', canvas.width / 2 + 10, 20);
+    }
     plot();
+    drawAxes();
+    drawGrid();
   </script>
 </body>
 
